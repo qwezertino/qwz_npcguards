@@ -17,18 +17,18 @@ Config.DBData = {
 
 Config.StaticRelations = true
 Config.StaticRelationsList = {
-    ['zombie'] = {
-        name = 'ZOMBIE',
-        state = Config.RelateStates.WAR
-    },
-    ['raiders'] = {
-        name = 'RAIDERS',
-        state = Config.RelateStates.WAR
-    },
+    -- ['zombie'] = {
+    --     name = 'ZOMBIE',
+    --     state = Config.RelateStates.WAR
+    -- },
+    -- ['raiders'] = {
+    --     name = 'RAIDERS',
+    --     state = Config.RelateStates.WAR
+    -- },
 }
 
 Config.NpcList = {
-    ['desert_wolfs'] = {
+    ['aztecas'] = {
         control = {
             coords = vector4(402.97, 3626.44, 33.32, 264.55),
             model = 'g_m_m_chicold_01',
@@ -53,7 +53,7 @@ Config.NpcList = {
             }
         },
     },
-    ['thelost'] = {
+    ['ballas'] = {
         control = {
             coords = vector4(1982.96, 3062.76, 47.18, 221.6),
             model = 'g_m_m_chicold_01',

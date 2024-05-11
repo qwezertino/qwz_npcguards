@@ -14,6 +14,59 @@ DON FORGET TO ADD NEW GANG WHEN YOU ADD SOME TO qb-core/shared/gangs.lua !!
  - Take `npcguards.sql` and upload to your Database
  - Just place `qz-npcguards` in your server scripts folder end ensure it!
 
+## Config
+
+In the config u can find all you need. This is example with some explanation
+
+```lua
+    ['aztecas'] = {
+        control = { -- Here is data for spawning ped with CONTROL menu for all ur guards
+            coords = vector4(402.97, 3626.44, 33.32, 264.55), -- Coords for this ped
+            model = 'g_m_m_chicold_01', -- Mode for ped
+        },
+        coords = { -- Coordinates for all peds that you want to spawn
+            vector4(402.97, 3606.44, 33.32, 264.55),
+            vector4(399.17, 3596.3, 33.32, 269.83),
+            vector4(403.05, 3566.97, 38.5, 274.65),
+            vector4(397.05, 3597.61, 37.27, 254.53),
+        },
+        models = { -- List of models name for yours peds. Models picks randomly
+            'g_m_m_chicold_01',
+        },
+        freeze = true, -- If you want to ped be freezed on place. Recomended to leave it true.
+        weapons = { -- Weapons section
+            guardArea = 10.0, -- Area that ped gonna guard around him, THIS OPTION NEED IF freeze IS SET TO FALSE! Just leave it 10.0
+            ammo = 10000, -- Amount of ammo we giving to ped
+            list = { -- List of weapons that we give to ped
+                "WEAPON_PISTOL",
+                "WEAPON_COMBATPISTOL",
+                "WEAPON_ASSAULTRIFLE",
+            }
+        },
+    },
+```
+This part is responsible for static relations. For example you have peds with relations group named `zombie` and you want to all your peds attack this group
+
+```lua
+    Config.StaticRelations = true
+    Config.StaticRelationsList = {
+        ['zombie'] = {
+            name = 'ZOMBIE',
+            state = Config.RelateStates.WAR
+        },
+    }
+```
+
+If you want to change some table names in Database - you can do changes here, but strongly NOT recommended to do this if you dont know what to do
+
+```lua
+    Config.DBData = {
+        tableName = 'npcguards',
+        frationColumnName = 'fraction_name',
+        relationColumnName = 'relations_data',
+    }
+```
+
 ## REQUIREMENTS
  - `qb-core`
  - `ox_lib`
