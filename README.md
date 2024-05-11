@@ -80,5 +80,6 @@ If you want to change some table names in Database - you can do changes here, bu
  - `/deleterel` - Show a menu to delete a gang and removes all relations to it
 
  ## TODO list
- - Automatic sync Gangs list from qb-core shared config, checks if there is new gangs and insert it into DB
+ - Auto sync Gangs list from qb-core shared config, checks if there is new gangs and insert it into DB
+ - Create functionality to place peds using ingame menu with saving all positions and data in Database
  - Create som interesting features xD
