@@ -17,7 +17,7 @@ DON FORGET TO ADD NEW GANG WHEN YOU ADD SOME TO qb-core/shared/gangs.lua !!
 ## REQUIREMENTS
  - `qb-core`
  - `ox_lib`
- - `ox_target`
+ - `ox_target` or `qb-target`
  - `oxmysql`
 
 ## Config
