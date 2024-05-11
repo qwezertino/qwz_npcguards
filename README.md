@@ -10,7 +10,7 @@ System just store to DB names for gangs and data with relations to all another s
 DON FORGET TO ADD NEW GANG WHEN YOU ADD SOME TO qb-core/shared/gangs.lua !!
 
 ## INSTALLATION
-
+ - Download the latest realese
  - Take `npcguards.sql` and upload to your Database
  - Just place `qz-npcguards` in your server scripts folder end ensure it!
 
