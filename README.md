@@ -71,6 +71,7 @@ If you want to change some table names in Database - you can do changes here, bu
  - `qb-core`
  - `ox_lib`
  - `ox_target`
+ - `oxmysql`
 
 ## COMMANDS
 
