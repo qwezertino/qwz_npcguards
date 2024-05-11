@@ -164,7 +164,7 @@ local function LoadControlPedMenu()
             }
         })
 
-        if Config.Target == 'qb-target' then
+        if Config.UseQBTarget then
             local options = {
                 type = "client",
                 icon = "fas fa-id-card",
