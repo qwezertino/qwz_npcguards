@@ -169,7 +169,7 @@ local function LoadControlPedMenu()
                 type = "client",
                 icon = "fas fa-id-card",
                 label = Lang:t('ped.target_menu_open'),
-                canInteract = function(entity, distance, coords, name, bone)
+                canInteract = function(entity, distance, data)
                     local playerData = QBCore.Functions.GetPlayerData()
                     return fractionName == playerData.gang.name and playerData.gang.isboss
                 end,
