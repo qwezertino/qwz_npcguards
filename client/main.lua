@@ -164,21 +164,39 @@ local function LoadControlPedMenu()
             }
         })
 
-        local options = {
-            type = "client",
-            icon = "fas fa-id-card",
-            label = Lang:t('ped.target_menu_open'),
-            canInteract = function(entity, distance, coords, name, bone)
-                local playerData = QBCore.Functions.GetPlayerData()
-                return fractionName == playerData.gang.name and playerData.gang.isboss
-            end,
-            onSelect = function(data)
-                if IsPedAPlayer(data.entity) then return false end
-                lib.showContext('guards_control_menu')
-            end,
-            distance = 2.0
-        }
-        exports.ox_target:addLocalEntity(ped, options)
+        if Config.Target == 'qb-target' then
+            local options = {
+                type = "client",
+                icon = "fas fa-id-card",
+                label = Lang:t('ped.target_menu_open'),
+                canInteract = function(entity, distance, coords, name, bone)
+                    local playerData = QBCore.Functions.GetPlayerData()
+                    return fractionName == playerData.gang.name and playerData.gang.isboss
+                end,
+                action = function(entity)
+                    if IsPedAPlayer(entity) then return false end
+                    lib.showContext('guards_control_menu')
+                end,
+                distance = 2.0
+            }
+            exports['qb-target']:AddTargetEntity(ped, options)
+        else
+            local options = {
+                type = "client",
+                icon = "fas fa-id-card",
+                label = Lang:t('ped.target_menu_open'),
+                canInteract = function(entity, distance, coords, name, bone)
+                    local playerData = QBCore.Functions.GetPlayerData()
+                    return fractionName == playerData.gang.name and playerData.gang.isboss
+                end,
+                onSelect = function(data)
+                    if IsPedAPlayer(data.entity) then return false end
+                    lib.showContext('guards_control_menu')
+                end,
+                distance = 2.0
+            }
+            exports.ox_target:addLocalEntity(ped, options)
+        end
     end
 end
 ---Load NPC Guards

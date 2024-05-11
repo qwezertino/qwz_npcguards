@@ -2,6 +2,7 @@
                                 --
 Config        = {}
 
+Config.Target = 'ox_target' --qb-target
 Config.RelateStates = {
     WAR = 5,
     NEUTRAL = 3,
