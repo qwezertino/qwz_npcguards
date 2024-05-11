@@ -2,8 +2,8 @@ fx_version 'cerulean'
 games { 'gta5' }
 
 author 'qwezert'
-description 'Raiders System for QB-Core Framework'
-version '1.3.0'
+description 'NPC Guardians system'
+version '1.0.1'
 
 shared_scripts {
     '@ox_lib/init.lua',
