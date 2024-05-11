@@ -33,7 +33,6 @@ local function deleteRelation(relName)
 
         relationsData[relName] = nil
 
-        print('new value', json.encode(relationsData))
         local updateQuery = ("UPDATE %s SET %s = :new_relation WHERE %s = :fraction_name"):format(
         Config.DBData.tableName, Config.DBData.relationColumnName, Config.DBData.frationColumnName)
         local success = MySQL.update.await(updateQuery,
