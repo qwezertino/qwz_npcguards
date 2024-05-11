@@ -179,7 +179,7 @@ local function LoadControlPedMenu()
                 end,
                 distance = 2.0
             }
-            exports['qb-target']:AddTargetEntity(ped, options)
+            exports['qb-target']:AddTargetEntity(ped, { options = {options}})
         else
             local options = {
                 type = "client",
