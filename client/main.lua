@@ -230,21 +230,30 @@ RegisterNetEvent('qwz_npcguards:client:SetGuardStats', function(netIds)
     end
 end)
 
-RegisterNetEvent('qwz_npcguards:client:ShowUpdateMenu', function()
+local function showUpdateMenu()
+    local relations = getAllRelationsFromDB()
+    if not next(relations) then return end
+
+    local inputOptions = {}
+    for fractionName, _ in pairs(relations) do
+        print('name', fractionName)
+        inputOptions[#inputOptions+1] = {
+            value = fractionName, label = QBCore.Shared.Gangs[fractionName]?.label or fracName
+        }
+    end
     local input = lib.inputDialog(Lang:t('menu.update_dialog_title'), {
-        {type = 'input', label = Lang:t('menu.update_dialog_label'),
-            description = Lang:t('menu.update_dialog_desc'), required = true, min = 1, max = 64},
+        {
+            type = 'select',
+            label = Lang:t('menu.update_dialog_label'),
+            options = inputOptions
+        }
     })
 
     if not input then return end
-    local exist = lib.callback.await("qwz_npcguards:server:GetRelationFromDB", false, input[1])
-
-    if not exist then return end
-
     showUpdateRelMenu(input[1])
-end)
+end
 
-RegisterNetEvent('qwz_npcguards:client:ShowCreateMenu', function()
+local function showCreateMenu()
     local input = lib.inputDialog(Lang:t('menu.create_dialog_title'), {
         {type = 'input', label = Lang:t('menu.create_dialog_label'),
             description = Lang:t('menu.create_dialog_desc'), required = true, min = 1, max = 64},
@@ -256,20 +265,79 @@ RegisterNetEvent('qwz_npcguards:client:ShowCreateMenu', function()
     if not created then return end
 
     showUpdateRelMenu(input[1])
-end)
+end
 
-RegisterNetEvent('qwz_npcguards:client:ShowDeleteMenu', function()
+local function showDeleteMenu()
+    local relations = getAllRelationsFromDB()
+    if not next(relations) then return end
+
+    local inputOptions = {}
+    for fractionName, _ in pairs(relations) do
+        print('name', fractionName)
+        inputOptions[#inputOptions+1] = {
+            value = fractionName, label = QBCore.Shared.Gangs[fractionName]?.label or fracName
+        }
+    end
+
     local input = lib.inputDialog(Lang:t('menu.delete_dialog_title'), {
-        {type = 'input', label = Lang:t('menu.delete_dialog_label'),
-            description = Lang:t('menu.delete_dialog_desc'), required = true, min = 1, max = 64},
+        {
+            type = 'select',
+            label = Lang:t('menu.update_dialog_label'),
+            options = inputOptions
+        }
     })
 
     if not input then return end
     local deleted = lib.callback.await("qwz_npcguards:server:DeleteRelation", false, input[1])
-
     if not deleted then return end
 
     QBCore.Functions.Notify('Success DELETED!', 'success', 7500)
+end
+
+RegisterNetEvent('qwz_npcguards:client:ShowAdminMenu', function(data)
+    lib.registerContext({
+        id = 'relations_admin_menu',
+        title = Lang:t('menu.admin_title'),
+        options = {
+            {
+                title = Lang:t('menu.admin_create'),
+                description = Lang:t('menu.admin_create_desc'),
+                icon = 'circle',
+                onSelect = function()
+                    showCreateMenu()
+                end,
+            },
+            {
+                title = Lang:t('menu.admin_update'),
+                description = Lang:t('menu.admin_update_desc'),
+                icon = 'circle',
+                onSelect = function()
+                    showUpdateMenu()
+                end,
+            },
+            {
+                title = Lang:t('menu.admin_delete'),
+                description = Lang:t('menu.admin_delete_desc'),
+                icon = 'circle',
+                onSelect = function()
+                    showDeleteMenu()
+                end,
+            },
+        }
+    })
+    lib.showContext('relations_admin_menu')
+end)
+
+RegisterNetEvent('qwz_npcguards:client:ShowUpdateMenu', function()
+    showUpdateMenu()
+end)
+
+RegisterNetEvent('qwz_npcguards:client:ShowCreateMenu', function()
+    showCreateMenu()
+end)
+
+RegisterNetEvent('qwz_npcguards:client:ShowDeleteMenu', function()
+    showDeleteMenu()
 end)
 
 
