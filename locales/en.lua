@@ -19,9 +19,17 @@ local Translations = {
         delete_dialog_label = 'Enter Fraction name',
         delete_dialog_desc = 'Usually gang name from qb-core/shared/gangs.lua',
 
-        update_dialog_title = 'Delete Fraction with relations',
-        update_dialog_label = 'Enter Fraction name',
+        update_dialog_title = 'Update fraction with Relations',
+        update_dialog_label = 'Select a Fraction',
         update_dialog_desc = 'Usually gang name from qb-core/shared/gangs.lua',
+
+        admin_title = 'Relations Control Panel',
+        admin_create = 'Create new Fraction',
+        admin_create_desc = 'Create new Fraction and relations table',
+        admin_update = 'Update Fraction',
+        admin_update_desc = 'Update relations between fractions!',
+        admin_delete = 'Delete Fraction',
+        admin_delete_desc = 'Delete fraction with all relations!',
     },
     ped = {
         target_menu_open = 'Open Guards Menu'
