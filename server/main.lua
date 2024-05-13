@@ -297,3 +297,7 @@ QBCore.Commands.Add('deleterel', Lang:t("commands.delete_relation"), {}, false, 
     TriggerClientEvent('qwz_npcguards:client:ShowDeleteMenu', source)
 end, 'admin')
 
+QBCore.Commands.Add('relmenu', Lang:t("commands.delete_relation"), {}, false, function(source, args)
+    TriggerClientEvent('qwz_npcguards:client:ShowAdminMenu', source)
+end, 'admin')
+
