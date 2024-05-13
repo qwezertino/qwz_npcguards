@@ -43,7 +43,6 @@ Config.NpcList = {
         models = {
             'g_m_m_chicold_01',
         },
-        freeze = true,
         weapons = {
             guardArea = 10.0,
             ammo = 10000,
@@ -70,7 +69,6 @@ Config.NpcList = {
         models = {
             'g_m_m_chicold_01',
         },
-        freeze = true,
         weapons = {
             guardArea = 10.0,
             ammo = 10000,

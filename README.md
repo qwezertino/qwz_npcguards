@@ -1,9 +1,9 @@
-# qz-npcguards
+# qwz_npcguards
 NPC Guards system
 
 ## !!!ATTENTION!!!
 
-All NPCs are created LOCALLY, they are not synchronized, since this is not necessary for this system. All peds play the role of essentially static turrets! If you want, you can remake the script to create synchronized peds
+ALL NPC ARE SYNCED NOW!!!
 
 System just store to DB names for gangs and data with relations to all another stored gangs. NPC can attack or not all players and peds base on relation they have to their group
 
@@ -12,7 +12,7 @@ DON FORGET TO ADD NEW GANG WHEN YOU ADD SOME TO qb-core/shared/gangs.lua !!
 ## INSTALLATION
  - Download the latest realese
  - Take `npcguards.sql` and upload to your Database
- - Just place `qz-npcguards` in your server scripts folder and ensure it!
+ - Just place `qwz_npcguards` in your server scripts folder and ensure it!
 
 ## REQUIREMENTS
  - `qb-core`
@@ -38,8 +38,7 @@ In the config u can find all you need. This is example with some explanation
         },
         models = { -- List of models name for yours peds. Models picks randomly
             'g_m_m_chicold_01',
-        },
-        freeze = true, -- If you want to ped be freezed on place. Recomended to leave it true.
+        },.
         weapons = { -- Weapons section
             guardArea = 10.0, -- Area that ped gonna guard around him, THIS OPTION NEED IF freeze IS SET TO FALSE! Just leave it 10.0
             ammo = 10000, -- Amount of ammo we giving to ped

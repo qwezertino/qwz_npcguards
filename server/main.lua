@@ -1,9 +1,81 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
+GlobalState.GuardiansNPC = {}
+
+---Create Guardians npc
+---@param hash any
+---@param coords any
+---@return integer
+local function createGuardPed(hash, coords)
+	local ped = CreatePed(4, hash, coords.x, coords.y, coords.z - 1.0, coords.w, true, true)
+	while not DoesEntityExist(ped) do
+		Wait(10)
+	end
+	return ped
+end
+
+---Check and setup guardians peds
+---@param npcList any
+local function checkAndSetupGuardians(npcList)
+	CreateThread(function()
+		while true do
+			local listToUpdate = {}
+			for id, data in pairs(npcList) do
+				if not DoesEntityExist(data.ped) then
+					local tmpList = GlobalState.GuardiansNPC
+					npcList[id] = createGuardPed(data.modelHash, data.coords)
+					GlobalState.GuardiansNPC = tmpList
+				end
+
+				if not Entity(data.ped).state.isGuardian then
+					local pedOwner = NetworkGetEntityOwner(data.ped)
+					if pedOwner ~= -1 then
+						print('ped not -11', Player(pedOwner).state.canUpdateGuardians)
+						if Player(pedOwner).state.canUpdateGuardians then
+							if not listToUpdate[pedOwner] then listToUpdate[pedOwner] = {} end
+							listToUpdate[pedOwner][#listToUpdate[pedOwner]+1] = data
+						end
+					end
+				end
+			end
+
+			if next(listToUpdate) then
+				for owner, data in pairs(listToUpdate) do
+					print('SEND TO OWNER', owner)
+					TriggerClientEvent('qwz_npcguards:client:SetGuardStats', owner, data)
+				end
+			end
+			Wait(1000)
+		end
+	end)
+end
 
 AddEventHandler('onResourceStart', function(resource)
-   if resource ~= GetCurrentResourceName() then
-      return
+	if resource ~= GetCurrentResourceName() then return end
+	local npcList = {}
+	for fractionName, data in pairs(Config.NpcList) do
+        for _, coords in pairs(data.coords) do
+            local randModel = type(data.models) == 'table' and GetHashKey(data.models[math.random(#data.models)]) or GetHashKey(data.models)
+			local ped = createGuardPed(randModel, coords)
+			npcList[#npcList+1] = {
+				ped = ped,
+				modelHash = randModel,
+				coords = coords,
+				weapons = data.weapons,
+				fractionHash = GetHashKey(fractionName),
+				netId = NetworkGetNetworkIdFromEntity(ped)
+			}
+        end
+    end
+	GlobalState.GuardiansNPC = npcList
+	checkAndSetupGuardians(npcList)
+end)
+
+AddEventHandler('onResourceStop', function(resource)
+   if resource == GetCurrentResourceName() then
+	   for _, data in pairs(GlobalState.GuardiansNPC) do
+		   DeleteEntity(data.ped)
+	   end
    end
 end)
 
@@ -33,6 +105,7 @@ local function deleteRelation(relName)
 
         relationsData[relName] = nil
 
+        print('new value', json.encode(relationsData))
         local updateQuery = ("UPDATE %s SET %s = :new_relation WHERE %s = :fraction_name"):format(
         Config.DBData.tableName, Config.DBData.relationColumnName, Config.DBData.frationColumnName)
         local success = MySQL.update.await(updateQuery,
@@ -47,7 +120,7 @@ local function deleteRelation(relName)
     local delQuery = ("DELETE FROM %s WHERE %s = :fraction_name"):format(Config.DBData.tableName, Config.DBData.frationColumnName)
     MySQL.query.await(delQuery, { ['fraction_name'] = relName })
 
-    TriggerClientEvent('qz-npcguards:client:UpdateRelaions', -1)
+    TriggerClientEvent('qwz_npcguards:client:UpdateRelaions', -1)
 
     return true
 end
@@ -91,7 +164,7 @@ local function createNewRelation(relName)
             MySQL.update.await(updateQuery,{["fraction_name"] = fractionName, ["relation_data"] = updatedRelations})
         end
         -- Trigger client event to update relations
-        TriggerClientEvent('qz-npcguards:client:UpdateRelaions', -1)
+        TriggerClientEvent('qwz_npcguards:client:UpdateRelaions', -1)
         return true
     else
         return false
@@ -179,28 +252,28 @@ local function formatDataToArray(response)
     return relations
 end
 
-lib.callback.register("qz-npcguards:server:GetAllRelationsFromDB", function(source)
+lib.callback.register("qwz_npcguards:server:GetAllRelationsFromDB", function(source)
     return formatDataToArray(getAllRelationsFromDB())
 end)
 
-lib.callback.register("qz-npcguards:server:GetRelationFromDB", function(source, fractionName)
+lib.callback.register("qwz_npcguards:server:GetRelationFromDB", function(source, fractionName)
     return formatDataToArray(getRelationFromDB(fractionName))
 end)
 
-lib.callback.register("qz-npcguards:server:CreateNewRelation", function(source, fractionName)
+lib.callback.register("qwz_npcguards:server:CreateNewRelation", function(source, fractionName)
     return createNewRelation(fractionName)
 end)
 
-lib.callback.register("qz-npcguards:server:DeleteRelation", function(source, fractionName)
+lib.callback.register("qwz_npcguards:server:DeleteRelation", function(source, fractionName)
     return deleteRelation(fractionName)
 end)
 
-RegisterNetEvent('qz-npcguards:server:UpdateRelations', function(relationsTable, targetFrac)
+RegisterNetEvent('qwz_npcguards:server:UpdateRelations', function(relationsTable, targetFrac)
     if type(relationsTable) == 'table' then
         for fractionName, relation in pairs(relationsTable) do
             updateRelations(targetFrac, fractionName, tonumber(relation))
         end
-        TriggerClientEvent('qz-npcguards:client:UpdateRelaions', -1)
+        TriggerClientEvent('qwz_npcguards:client:UpdateRelaions', -1)
     end
 end)
 
@@ -213,13 +286,14 @@ QBCore.Commands.Add('storegangs', Lang:t("commands.store_gangs_relation"), {}, f
 end, 'admin')
 
 QBCore.Commands.Add('createrel', Lang:t("commands.create_new_relation"), {}, false, function(source, args)
-    TriggerClientEvent('qz-npcguards:client:ShowCreateMenu', source)
+    TriggerClientEvent('qwz_npcguards:client:ShowCreateMenu', source)
 end, 'admin')
 
 QBCore.Commands.Add('updaterel', Lang:t("commands.update_relation"), {}, false, function(source, args)
-    TriggerClientEvent('qz-npcguards:client:ShowUpdateMenu', source)
+    TriggerClientEvent('qwz_npcguards:client:ShowUpdateMenu', source)
 end, 'admin')
 
 QBCore.Commands.Add('deleterel', Lang:t("commands.delete_relation"), {}, false, function(source, args)
-    TriggerClientEvent('qz-npcguards:client:ShowDeleteMenu', source)
+    TriggerClientEvent('qwz_npcguards:client:ShowDeleteMenu', source)
 end, 'admin')
+

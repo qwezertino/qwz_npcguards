@@ -1,5 +1,13 @@
 QBCore = exports['qb-core']:GetCoreObject()
 
+-- function DrawText3D(msg, coords)
+--     AddTextEntry('esxFloatingHelpNotification', msg)
+--     SetFloatingHelpTextWorldPosition(1, coords)
+--     SetFloatingHelpTextStyle(1, 1, 2, -1, 3, 0)
+--     BeginTextCommandDisplayHelp('esxFloatingHelpNotification')
+--     EndTextCommandDisplayHelp(2, false, false, -1)
+-- end
+
 local function SetupGuardianPed(ped)
     if IsPedHuman(ped) and not IsPedAPlayer(ped) and not IsPedDeadOrDying(ped, true) then
         SetPedCombatAttributes(ped, 46, true) -- set the ped's combat attributes to make them use cover and avoid vehicles
@@ -34,14 +42,14 @@ end
 ---Get relations table from DB
 ---@return table
 local function getAllRelationsFromDB()
-    return lib.callback.await("qz-npcguards:server:GetAllRelationsFromDB", false)
+    return lib.callback.await("qwz_npcguards:server:GetAllRelationsFromDB", false)
 end
 
 ---Get relations table for fraction
 ---@param fractionName string
 ---@return table
 local function getRelationFromDB(fractionName)
-    return lib.callback.await("qz-npcguards:server:GetRelationFromDB", false, fractionName)
+    return lib.callback.await("qwz_npcguards:server:GetRelationFromDB", false, fractionName)
 end
 
 ---Init Load Relations and set it for player and npc
@@ -51,6 +59,7 @@ local function LoadRelations()
     if not relations then return print('no relations!!!') end
 
     for groupName1, values in pairs(relations) do
+        AddRelationshipGroup(groupName1)
         local fracHash1 = GetHashKey(groupName1)
         for groupName2, relation in pairs(values) do
             local fracHash2 = GetHashKey(groupName2)
@@ -81,15 +90,9 @@ end
 ---@param weapons table
 ---@param fractionHash integer
 ---@param isFreeze boolean
-local function createAndSetPed(coords, models, weapons, fractionHash, isFreeze)
-    local randModel = type(models) == 'table' and GetHashKey(models[math.random(#models)]) or GetHashKey(models)
-    local ped = CreatePed(4, randModel, coords.x, coords.y, coords.z - 1.0, coords.w, false, false)
+local function setGuardianPed(ped, coords, weapons, fractionHash)
     SetPedRelationshipGroupHash(ped, fractionHash)
     SetupGuardianPed(ped)
-
-    if isFreeze then
-        FreezeEntityPosition(ped, true)
-    end
 
     TaskStandGuard(ped, coords.x, coords.y, coords.z - 1.0, coords.w, 'WORLD_HUMAN_GUARD_STAND')
     TaskGuardCurrentPosition(ped, weapons.guardArea, weapons.guardArea, true)
@@ -130,10 +133,9 @@ local function showUpdateRelMenu(fractionName)
         for _, value in ipairs(input) do
             local delimiter = ":"
             local fracName, relation = value:match("([^" .. delimiter .. "]+)" .. delimiter .. "(.*)")
-            print('DATA', fracName, relation)
             newRelTable[fracName] = tonumber(relation)
         end
-        TriggerServerEvent('qz-npcguards:server:UpdateRelations', newRelTable, fractionName)
+        TriggerServerEvent('qwz_npcguards:server:UpdateRelations', newRelTable, fractionName)
     end
 end
 
@@ -163,7 +165,6 @@ local function LoadControlPedMenu()
                 },
             }
         })
-
         if Config.UseQBTarget then
             local options = {
                 type = "client",
@@ -199,64 +200,62 @@ local function LoadControlPedMenu()
         end
     end
 end
----Load NPC Guards
-local function LoadNpsGuards()
-    for frac_name, data in pairs(Config.NpcList) do
-        local fracHash = GetHashKey(frac_name)
-        AddRelationshipGroup(frac_name)
-        if type(data.models) == 'table' then
-            for _, model in pairs(data.models) do
-                lib.requestModel(GetHashKey(model))
-            end
-        elseif type(data.models) == 'string' then
-            lib.requestModel(GetHashKey(data.models))
-        end
-        for _, coords in pairs(data.coords) do
-            createAndSetPed(coords, data.models, data.weapons, fracHash, data.freeze)
-        end
-    end
-end
 
-RegisterNetEvent('qz-npcguards:client:UpdateRelaions', function()
+RegisterNetEvent('qwz_npcguards:client:UpdateRelaions', function()
     LoadRelations()
 end)
 
-RegisterNetEvent('qz-npcguards:client:ShowUpdateMenu', function()
+RegisterNetEvent('qwz_npcguards:client:SetGuardStats', function(netIds)
+    print('get array peds')
+    for _, data in ipairs(netIds) do
+        local ped = NetToPed(data.netId)
+        while not DoesEntityExist(ped) do
+            Wait(10)
+        end
+        if not Entity(ped).state.isGuardian then
+            Entity(ped).state:set('isGuardian', true, true) -- isGuardian
+        end
+        print('set guards')
+        setGuardianPed(ped, data.coords, data.weapons, data.fractionHash)
+    end
+end)
+
+RegisterNetEvent('qwz_npcguards:client:ShowUpdateMenu', function()
     local input = lib.inputDialog(Lang:t('menu.update_dialog_title'), {
         {type = 'input', label = Lang:t('menu.update_dialog_label'),
             description = Lang:t('menu.update_dialog_desc'), required = true, min = 1, max = 64},
     })
 
     if not input then return end
-    local exist = lib.callback.await("qz-npcguards:server:GetRelationFromDB", false, input[1])
+    local exist = lib.callback.await("qwz_npcguards:server:GetRelationFromDB", false, input[1])
 
     if not exist then return end
 
     showUpdateRelMenu(input[1])
 end)
 
-RegisterNetEvent('qz-npcguards:client:ShowCreateMenu', function()
+RegisterNetEvent('qwz_npcguards:client:ShowCreateMenu', function()
     local input = lib.inputDialog(Lang:t('menu.create_dialog_title'), {
         {type = 'input', label = Lang:t('menu.create_dialog_label'),
             description = Lang:t('menu.create_dialog_desc'), required = true, min = 1, max = 64},
     })
 
     if not input then return end
-    local created = lib.callback.await("qz-npcguards:server:CreateNewRelation", false, input[1])
+    local created = lib.callback.await("qwz_npcguards:server:CreateNewRelation", false, input[1])
 
     if not created then return end
 
     showUpdateRelMenu(input[1])
 end)
 
-RegisterNetEvent('qz-npcguards:client:ShowDeleteMenu', function()
+RegisterNetEvent('qwz_npcguards:client:ShowDeleteMenu', function()
     local input = lib.inputDialog(Lang:t('menu.delete_dialog_title'), {
         {type = 'input', label = Lang:t('menu.delete_dialog_label'),
             description = Lang:t('menu.delete_dialog_desc'), required = true, min = 1, max = 64},
     })
 
     if not input then return end
-    local deleted = lib.callback.await("qz-npcguards:server:DeleteRelation", false, input[1])
+    local deleted = lib.callback.await("qwz_npcguards:server:DeleteRelation", false, input[1])
 
     if not deleted then return end
 
@@ -276,14 +275,13 @@ end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     Wait(2000)
-    LoadNpsGuards()
     LoadRelations()
     LoadControlPedMenu()
+    LocalPlayer.state:set('canUpdateGuardians', true, true)
 end)
 
 AddEventHandler('onResourceStart', function(r)
     if GetCurrentResourceName() ~= r then return end
-    LoadNpsGuards()
     LoadRelations()
     LoadControlPedMenu()
 end)
