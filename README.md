@@ -55,8 +55,8 @@ This part is responsible for static relations. For example you have peds with re
 ```lua
     Config.StaticRelations = true
     Config.StaticRelationsList = {
-        ['zombie'] = {
-            name = 'ZOMBIE',
+        ['zombie'] = { -- just name for the table
+            name = 'ZOMBIE', -- NAME OF YOUR RELATION STRING
             state = Config.RelateStates.WAR
         },
     }
@@ -73,8 +73,8 @@ If you want to change some table names in Database - you can do changes here, bu
 ```
 
 ## COMMANDS
-
  - `/storegangs` - Gets all yours gangs from the `/qb-core/shared/gangs.lua` and save it into DB with all NEUTRAL relations between each other
+ - `/relmenu` - Shows an Control Menu with buttons to create, update and delete fractions with relations
  - `/createrel` - Show a menu to create a NEW gang (or fraction) with some new custom relations to all another gangs
  - `/updaterel` - Show a menu to update a gang (or fraction) with relations
  - `/deleterel` - Show a menu to delete a gang and removes all relations to it
