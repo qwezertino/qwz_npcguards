@@ -7,6 +7,9 @@ Config.RelateStates = {
     WAR = 5,
     NEUTRAL = 3,
     FRIEND = 0,
+    RESPECT = 1,
+    LIKE = 2,
+    DISLIKE = 4,
 }
 
 -- DONT CHANGE THIS IF YOU DONT CHANGE ANYTHING IN DB!!!!

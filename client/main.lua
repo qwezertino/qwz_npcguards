@@ -58,14 +58,20 @@ local function LoadRelations()
     local relations = getAllRelationsFromDB()
     if not relations then return print('no relations!!!') end
 
+    for groupName, _ in pairs(relations) do
+        if not DoesRelationshipGroupExist(GetHashKey(groupName)) then
+            AddRelationshipGroup(groupName)
+            print('relate created', groupName)
+        end
+    end
+
     for groupName1, values in pairs(relations) do
-        AddRelationshipGroup(groupName1)
         local fracHash1 = GetHashKey(groupName1)
         for groupName2, relation in pairs(values) do
             local fracHash2 = GetHashKey(groupName2)
             SetRelationshipBetweenGroups(relation, fracHash1, fracHash2)
             SetRelationshipBetweenGroups(relation, fracHash2, fracHash1)
-            -- print('set relation', groupName1, groupName2, relation)
+            print('set relation', groupName1, groupName2, relation)
         end
 
         local playerGroup = GetPedRelationshipGroupHash(cache.ped)
@@ -91,7 +97,9 @@ end
 ---@param fractionHash integer
 ---@param isFreeze boolean
 local function setGuardianPed(ped, coords, weapons, fractionHash)
+    print('hash', fractionHash)
     SetPedRelationshipGroupHash(ped, fractionHash)
+    print('GHet', GetPedRelationshipGroupHash(ped))
     SetupGuardianPed(ped)
 
     TaskStandGuard(ped, coords.x, coords.y, coords.z - 1.0, coords.w, 'WORLD_HUMAN_GUARD_STAND')
@@ -114,15 +122,15 @@ local function showUpdateRelMenu(fractionName)
 
     local inputs = {}
     for fracName, relation in pairs(relations[fractionName]) do
+        local relateOptions = {}
+        for key, value in pairs(Config.RelateStates) do
+            relateOptions[#relateOptions+1] = {value = fracName .. ":" .. value, label = Lang:t('menu.' .. key:lower())}
+        end
         inputs[#inputs+1] = {
             type = 'select',
             label = QBCore.Shared.Gangs[fracName]?.label or fracName,
             default = fracName .. ":".. relation,
-            options = {
-                {value = fracName .. ":" .. Config.RelateStates.FRIEND, label = Lang:t('menu.friend')},
-                {value = fracName .. ":" .. Config.RelateStates.NEUTRAL, label = Lang:t('menu.neutral')},
-                {value = fracName .. ":" .. Config.RelateStates.WAR, label = Lang:t('menu.war')},
-            }
+            options = relateOptions
         }
     end
 
@@ -207,6 +215,8 @@ end)
 
 RegisterNetEvent('qwz_npcguards:client:SetGuardStats', function(netIds)
     print('get array peds')
+    LoadRelations()
+
     for _, data in ipairs(netIds) do
         local ped = NetToPed(data.netId)
         while not DoesEntityExist(ped) do
