@@ -20,12 +20,12 @@ local function SetupGuardianPed(ped)
         SetPedCombatMovement(ped, 1) -- set the ped's combat movement to aggressive
 
         SetPedSeeingRange(ped, 100.0)
-        SetPedHearingRange(ped, 50.0)
+        SetPedHearingRange(ped, 100.0)
 
         SetPedArmour(ped, 100)
         SetEntityHealth(ped, 200)
 
-        SetEntityInvincible(ped, true)
+        if not Config.GuardsAreMortal then SetEntityInvincible(ped, true) end
     end
 end
 
@@ -97,14 +97,13 @@ end
 ---@param fractionHash integer
 ---@param isFreeze boolean
 local function setGuardianPed(ped, coords, weapons, fractionHash)
-    print('hash', fractionHash)
     SetPedRelationshipGroupHash(ped, fractionHash)
-    print('GHet', GetPedRelationshipGroupHash(ped))
     SetupGuardianPed(ped)
 
-    TaskStandGuard(ped, coords.x, coords.y, coords.z - 1.0, coords.w, 'WORLD_HUMAN_GUARD_STAND')
-    TaskGuardCurrentPosition(ped, weapons.guardArea, weapons.guardArea, true)
-    TaskCombatHatedTargetsAroundPed(ped, 50.0, 0)
+    TaskGuardSphereDefensiveArea(ped, coords.x, coords.y, coords.z - 1.0, weapons.guardArea, weapons.guardArea, 1, coords.x, coords.y, coords.z, weapons.guardArea)
+    -- TaskStandGuard(ped, coords.x, coords.y, coords.z - 1.0, coords.w, 'WORLD_HUMAN_GUARD_STAND')
+    -- TaskGuardCurrentPosition(ped, weapons.guardArea, weapons.guardArea, true)
+    -- TaskCombatHatedTargetsAroundPed(ped, 50.0, 0)
 
     if type(weapons.list) == 'table' then
         for _, modelName in ipairs(weapons.list) do
@@ -119,6 +118,7 @@ end
 local function showUpdateRelMenu(fractionName)
     local relations = getRelationFromDB(fractionName)
     if not relations then return end
+    if not next(relations) then return QBCore.Functions.Notify('NO RELATIONS IN DB | USE /storegangs command!', 'error', 7500) end
 
     local inputs = {}
     for fracName, relation in pairs(relations[fractionName]) do
@@ -153,9 +153,10 @@ local function LoadControlPedMenu()
         local models = value.control.model
 
         local ped = CreatePed(4, GetHashKey(models), pedCoords.x, pedCoords.y, pedCoords.z - 1.0, pedCoords.w, false, false)
-        SetupGuardianPed(ped)
+        SetPedArmour(ped, 100)
+        SetEntityHealth(ped, 200)
+        SetEntityInvincible(ped, true)
         TaskStandGuard(ped, pedCoords.x, pedCoords.y, pedCoords.z - 1.0, pedCoords.w, 'WORLD_HUMAN_GUARD_STAND')
-        GiveWeaponToPed(ped, GetHashKey('WEAPON_ASSAULTRIFLE'), 100, false, true)
         SetBlockingOfNonTemporaryEvents(ped, true)
         FreezeEntityPosition(ped, true)
 
@@ -173,6 +174,7 @@ local function LoadControlPedMenu()
                 },
             }
         })
+
         if Config.UseQBTarget then
             local options = {
                 type = "client",
@@ -214,18 +216,16 @@ RegisterNetEvent('qwz_npcguards:client:UpdateRelaions', function()
 end)
 
 RegisterNetEvent('qwz_npcguards:client:SetGuardStats', function(netIds)
-    print('get array peds')
     LoadRelations()
-
     for _, data in ipairs(netIds) do
         local ped = NetToPed(data.netId)
         while not DoesEntityExist(ped) do
+            ped = NetToPed(data.netId)
             Wait(10)
         end
         if not Entity(ped).state.isGuardian then
             Entity(ped).state:set('isGuardian', true, true) -- isGuardian
         end
-        print('set guards')
         setGuardianPed(ped, data.coords, data.weapons, data.fractionHash)
     end
 end)
@@ -236,7 +236,6 @@ local function showUpdateMenu()
 
     local inputOptions = {}
     for fractionName, _ in pairs(relations) do
-        print('name', fractionName)
         inputOptions[#inputOptions+1] = {
             value = fractionName, label = QBCore.Shared.Gangs[fractionName]?.label or fracName
         }
@@ -273,7 +272,6 @@ local function showDeleteMenu()
 
     local inputOptions = {}
     for fractionName, _ in pairs(relations) do
-        print('name', fractionName)
         inputOptions[#inputOptions+1] = {
             value = fractionName, label = QBCore.Shared.Gangs[fractionName]?.label or fracName
         }

@@ -21,19 +21,31 @@ local function checkAndSetupGuardians(npcList)
 		while true do
 			local listToUpdate = {}
 			for id, data in pairs(npcList) do
-				if not DoesEntityExist(data.ped) then
-					local tmpList = GlobalState.GuardiansNPC
-					npcList[id] = createGuardPed(data.modelHash, data.coords)
-					GlobalState.GuardiansNPC = tmpList
-				end
+				if DoesEntityExist(data.ped) then
+					if not Entity(data.ped).state.isGuardian then
+						local pedOwner = NetworkGetEntityOwner(data.ped)
+						if pedOwner ~= -1 then
+							if Player(pedOwner).state.canUpdateGuardians then
+								if not listToUpdate[pedOwner] then listToUpdate[pedOwner] = {} end
+								listToUpdate[pedOwner][#listToUpdate[pedOwner]+1] = data
+							end
+						end
+					end
+					if Entity(data.ped).state.isGuardian and pedOwner ~= -1 and GetEntityHealth(data.ped) <= 0 then
+						if not Entity(data.ped).state.guardDeathTime then
+							Entity(data.ped).state:set('guardDeathTime', GetGameTimer(), true)
+						end
+					end
 
-				if not Entity(data.ped).state.isGuardian then
-					local pedOwner = NetworkGetEntityOwner(data.ped)
-					if pedOwner ~= -1 then
-						print('ped not -11', Player(pedOwner).state.canUpdateGuardians)
-						if Player(pedOwner).state.canUpdateGuardians then
-							if not listToUpdate[pedOwner] then listToUpdate[pedOwner] = {} end
-							listToUpdate[pedOwner][#listToUpdate[pedOwner]+1] = data
+					if Entity(data.ped).state.guardDeathTime then
+						local deathTime = GetGameTimer() - Entity(data.ped).state.guardDeathTime
+						if deathTime >= Config.DespawnDeadTimer*1000 then
+							DeleteEntity(data.ped)
+							local ped = createGuardPed(data.modelHash, data.coords)
+							npcList[id].ped = ped
+							npcList[id].netId = NetworkGetNetworkIdFromEntity(ped)
+							Entity(ped).state:set('guardDeathTime', nil, true)
+							GlobalState.GuardiansNPC = npcList
 						end
 					end
 				end
@@ -41,7 +53,6 @@ local function checkAndSetupGuardians(npcList)
 
 			if next(listToUpdate) then
 				for owner, data in pairs(listToUpdate) do
-					print('SEND TO OWNER', owner)
 					TriggerClientEvent('qwz_npcguards:client:SetGuardStats', owner, data)
 				end
 			end
@@ -74,8 +85,11 @@ end)
 AddEventHandler('onResourceStop', function(resource)
    if resource == GetCurrentResourceName() then
 	   for _, data in pairs(GlobalState.GuardiansNPC) do
-		   DeleteEntity(data.ped)
+		   if DoesEntityExist(data.ped) then
+				DeleteEntity(data.ped)
+		   end
 	   end
+	   GlobalState.GuardiansNPC = {}
    end
 end)
 

@@ -24,6 +24,16 @@ DON FORGET TO ADD NEW GANG WHEN YOU ADD SOME TO qb-core/shared/gangs.lua !!
 
 In the config u can find all you need. This is example with some explanation
 
+
+This section for setting your guardians mortality. If they killed - then script auto-respawn it after some seconds setted in DespawnDeadTimer
+
+```lua
+Config.GuardsAreMortal = true
+Config.DespawnDeadTimer = 60 -- time in seconds
+```
+
+Adding a guards for gang `aztecas`
+
 ```lua
     ['aztecas'] = {
         control = { -- Here is data for spawning ped with CONTROL menu for all ur guards

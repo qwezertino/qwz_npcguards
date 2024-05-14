@@ -31,6 +31,8 @@ Config.StaticRelationsList = {
     -- },
 }
 
+Config.GuardsAreMortal = true
+Config.DespawnDeadTimer = 60 -- time in seconds
 Config.NpcList = {
     ['aztecas'] = {
         control = {
