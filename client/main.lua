@@ -152,7 +152,11 @@ local function LoadControlPedMenu()
         local pedCoords = value.control.coords
         local models = value.control.model
 
+        lib.requestModel(models)
         local ped = CreatePed(4, GetHashKey(models), pedCoords.x, pedCoords.y, pedCoords.z - 1.0, pedCoords.w, false, false)
+        while not DoesEntityExist(ped) do
+            Wait(10)
+        end
         SetPedArmour(ped, 100)
         SetEntityHealth(ped, 200)
         SetEntityInvincible(ped, true)
