@@ -101,6 +101,14 @@ local function setGuardianPed(ped, weapons, fractionHash)
     SetupGuardianPed(ped)
     TaskGuardCurrentPosition(ped, weapons.guardArea, weapons.guardArea, true)
 
+    if type(weapons.list) == 'table' then
+        for _, modelName in ipairs(weapons.list) do
+            GiveWeaponToPed(ped, GetHashKey(modelName), weapons.ammo, true, true)
+        end
+    elseif type(weapons.list) == 'string' then
+        GiveWeaponToPed(ped, GetHashKey(weapons.list), weapons.ammo, true, true)
+    end
+
     CreateThread(function()
         while true do
             local taskStatus = GetScriptTaskStatus(ped, "SCRIPT_TASK_GUARD_CURRENT_POSITION") --TASK_FOLLOW_NAV_MESH_TO_COORD
@@ -118,13 +126,6 @@ local function setGuardianPed(ped, weapons, fractionHash)
         end
     end)
 
-    if type(weapons.list) == 'table' then
-        for _, modelName in ipairs(weapons.list) do
-            GiveWeaponToPed(ped, GetHashKey(modelName), weapons.ammo, true, true)
-        end
-    elseif type(weapons.list) == 'string' then
-        GiveWeaponToPed(ped, GetHashKey(weapons.list), weapons.ammo, true, true)
-    end
 end
 
 
