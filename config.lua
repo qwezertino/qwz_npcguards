@@ -75,7 +75,7 @@ Config.NpcList = {
             'g_m_m_chicold_01',
         },
         weapons = {
-            guardArea = 10.0,
+            guardArea = 2.0,
             ammo = 10000,
             list = {
                 "WEAPON_PISTOL",

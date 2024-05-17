@@ -99,18 +99,31 @@ end
 local function setGuardianPed(ped, coords, weapons, fractionHash)
     SetPedRelationshipGroupHash(ped, fractionHash)
     SetupGuardianPed(ped)
+    TaskGuardCurrentPosition(ped, weapons.guardArea, weapons.guardArea, true)
 
-    TaskGuardSphereDefensiveArea(ped, coords.x, coords.y, coords.z - 1.0, weapons.guardArea, weapons.guardArea, 1, coords.x, coords.y, coords.z, weapons.guardArea)
-    -- TaskStandGuard(ped, coords.x, coords.y, coords.z - 1.0, coords.w, 'WORLD_HUMAN_GUARD_STAND')
-    -- TaskGuardCurrentPosition(ped, weapons.guardArea, weapons.guardArea, true)
-    -- TaskCombatHatedTargetsAroundPed(ped, 50.0, 0)
+    CreateThread(function()
+        while true do
+            local taskStatus = GetScriptTaskStatus(ped, "SCRIPT_TASK_GUARD_CURRENT_POSITION") --TASK_FOLLOW_NAV_MESH_TO_COORD
+            if taskStatus == 7 then
+                TaskGuardCurrentPosition(ped, weapons.guardArea, weapons.guardArea, true)
+            end
+            local hasweap, weaphash = GetCurrentPedWeapon(ped, true)
+            if hasweap then
+                local currAmmo = GetAmmoInPedWeapon(ped, weaphash)
+                if currAmmo <= 100 then
+                    SetPedAmmo(ped, weaphash, weapons.ammo)
+                end
+            end
+            Wait(1000)
+        end
+    end)
 
     if type(weapons.list) == 'table' then
         for _, modelName in ipairs(weapons.list) do
-            GiveWeaponToPed(ped, GetHashKey(modelName), weapons.ammo, false, true)
+            GiveWeaponToPed(ped, GetHashKey(modelName), weapons.ammo, true, true)
         end
     elseif type(weapons.list) == 'string' then
-        GiveWeaponToPed(ped, GetHashKey(weapons.list), weapons.ammo, false, true)
+        GiveWeaponToPed(ped, GetHashKey(weapons.list), weapons.ammo, true, true)
     end
 end
 

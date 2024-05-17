@@ -50,8 +50,8 @@ Adding a guards for gang `aztecas`
             'g_m_m_chicold_01',
         },.
         weapons = { -- Weapons section
-            guardArea = 10.0, -- Area that ped gonna guard around him, THIS OPTION NEED IF freeze IS SET TO FALSE! Just leave it 10.0
-            ammo = 10000, -- Amount of ammo we giving to ped
+            guardArea = 2.0, -- How many units ped gonna walk around his spawn point
+            ammo = 250, -- Amount of ammo we giving to ped
             list = { -- List of weapons that we give to ped
                 "WEAPON_PISTOL",
                 "WEAPON_COMBATPISTOL",
