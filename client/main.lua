@@ -96,7 +96,7 @@ end
 ---@param weapons table
 ---@param fractionHash integer
 ---@param isFreeze boolean
-local function setGuardianPed(ped, coords, weapons, fractionHash)
+local function setGuardianPed(ped, weapons, fractionHash)
     SetPedRelationshipGroupHash(ped, fractionHash)
     SetupGuardianPed(ped)
     TaskGuardCurrentPosition(ped, weapons.guardArea, weapons.guardArea, true)
@@ -243,7 +243,7 @@ RegisterNetEvent('qwz_npcguards:client:SetGuardStats', function(netIds)
         if not Entity(ped).state.isGuardian then
             Entity(ped).state:set('isGuardian', true, true) -- isGuardian
         end
-        setGuardianPed(ped, data.coords, data.weapons, data.fractionHash)
+        setGuardianPed(ped, data.weapons, data.fractionHash)
     end
 end)
 
